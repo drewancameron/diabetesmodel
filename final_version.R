@@ -45,20 +45,6 @@ irsad_table <- read.csv("SA1_IRSAD_lookup.csv.csv",skip=11,header = FALSE)
 
 lookups <- match(sa1_2021$SA1_CODE21,irsad_table$V1)
 irsad_codes <- apply(cbind(irsad_table$V2,irsad_table$V3,irsad_table$V4,irsad_table$V5,irsad_table$V6,irsad_table$V7,irsad_table$V8,irsad_table$V9,irsad_table$V10,irsad_table$V11,irsad_table$V12,irsad_table$V13)[lookups,],1,which.max)
-irsad_codes[irsad_codes==11] <- NA
-
-to.infill <- which(is.na(irsad_codes))
-for (i in 1:length(to.infill)) {
-  av.code <- round(mean(irsad_codes[nb[[to.infill[i]]]],na.rm=TRUE))
-  irsad_codes[to.infill[i]] <- av.code
-}
-
-mean.with.na <- function(x) {mean(x,na.rm=TRUE)}
-mean.irsads <- aggregate(irsad_codes,list(match(sa1_2021$SA3_CODE21,unique(sa1_2021$SA3_CODE21))),mean.with.na)
-mean.irsads <- mean.irsads[match(sa1_2021$SA3_CODE21,unique(sa1_2021$SA3_CODE21)),2]
-
-to.infill <- which(is.na(irsad_codes))
-irsad_codes[to.infill] <- round(mean.irsads[to.infill])
 
 ### Read in CENSUS DATA : SA1 x HDIAP
 
@@ -385,6 +371,60 @@ SA4_num_dwellings_obsY <- SA4_num_dwellings_by_DATUM[,M+2]
 STE_num_dwellings_by_DATUM_obsY <- STE_num_dwellings_by_DATUM[,-c(1,M+2)]
 STE_num_dwellings_obsY <- STE_num_dwellings_by_DATUM[,M+2]
 
+# IRSAD 0-9
+xdata <- read.csv("~/VIRTUAL_WA/DIABETES/IRSAD_HDIAP_09.csv",skip=12,header = FALSE)[1:11,]
+IRSAD_by_DATUM <- as.numeric(xdata$V1)
+for (i in 2:(dim(xdata)[2]-1)) {
+  eval(parse(text=paste0("IRSAD_by_DATUM <- cbind(IRSAD_by_DATUM,as.numeric(xdata$V",i,"))")))
+}
+IRSAD_by_DATUM <- as.matrix(IRSAD_by_DATUM[,2:4])
+IRSAD_by_DATUM_09 <- IRSAD_by_DATUM
+
+# IRSAD 10-14
+xdata <- read.csv("~/VIRTUAL_WA/DIABETES/IRSAD_HDIAP_1014.csv",skip=12,header = FALSE)[1:11,]
+IRSAD_by_DATUM <- as.numeric(xdata$V1)
+for (i in 2:(dim(xdata)[2]-1)) {
+  eval(parse(text=paste0("IRSAD_by_DATUM <- cbind(IRSAD_by_DATUM,as.numeric(xdata$V",i,"))")))
+}
+IRSAD_by_DATUM <- as.matrix(IRSAD_by_DATUM[,2:4])
+IRSAD_by_DATUM_1014 <- IRSAD_by_DATUM
+
+# IRSAD 15-19
+xdata <- read.csv("~/VIRTUAL_WA/DIABETES/IRSAD_HDIAP_1519.csv",skip=12,header = FALSE)[1:11,]
+IRSAD_by_DATUM <- as.numeric(xdata$V1)
+for (i in 2:(dim(xdata)[2]-1)) {
+  eval(parse(text=paste0("IRSAD_by_DATUM <- cbind(IRSAD_by_DATUM,as.numeric(xdata$V",i,"))")))
+}
+IRSAD_by_DATUM <- as.matrix(IRSAD_by_DATUM[,2:4])
+IRSAD_by_DATUM_1519 <- IRSAD_by_DATUM
+
+# RA 0-9
+xdata <- read.csv("~/VIRTUAL_WA/DIABETES/RA_HDIAP_09.csv",skip=12,header = FALSE)[1:5,]
+RA_by_DATUM <- as.numeric(xdata$V1)
+for (i in 2:(dim(xdata)[2]-1)) {
+  eval(parse(text=paste0("RA_by_DATUM <- cbind(RA_by_DATUM,as.numeric(xdata$V",i,"))")))
+}
+RA_by_DATUM <- as.matrix(RA_by_DATUM[,2:4])
+RA_by_DATUM_09 <- RA_by_DATUM
+
+# RA 10-14
+xdata <- read.csv("~/VIRTUAL_WA/DIABETES/RA_HDIAP_1014.csv",skip=12,header = FALSE)[1:5,]
+RA_by_DATUM <- as.numeric(xdata$V1)
+for (i in 2:(dim(xdata)[2]-1)) {
+  eval(parse(text=paste0("RA_by_DATUM <- cbind(RA_by_DATUM,as.numeric(xdata$V",i,"))")))
+}
+RA_by_DATUM <- as.matrix(RA_by_DATUM[,2:4])
+RA_by_DATUM_1014 <- RA_by_DATUM
+
+# RA 15-19
+xdata <- read.csv("~/VIRTUAL_WA/DIABETES/RA_HDIAP_1519.csv",skip=12,header = FALSE)[1:5,]
+RA_by_DATUM <- as.numeric(xdata$V1)
+for (i in 2:(dim(xdata)[2]-1)) {
+  eval(parse(text=paste0("RA_by_DATUM <- cbind(RA_by_DATUM,as.numeric(xdata$V",i,"))")))
+}
+RA_by_DATUM <- as.matrix(RA_by_DATUM[,2:4])
+RA_by_DATUM_1519 <- RA_by_DATUM
+
 ### Construct geospatial mesh model
 
 library(INLA)
@@ -483,6 +523,14 @@ true_SA3_HDIAP_1519 <- aggregate(true_SA1_HDIAP_1519,list(sa1sa3codes),sum)[,-1]
 true_SA4_HDIAP_1519 <- aggregate(true_SA1_HDIAP_1519,list(sa1sa4codes),sum)[,-1]
 true_STE_HDIAP_1519 <- aggregate(true_SA1_HDIAP_1519,list(sa1stecodes),sum)[,-1]
 
+true_IRSAD_HDIAP_09 <- aggregate(true_SA1_HDIAP_09,list(irsad_codes),sum)[,-1]
+true_IRSAD_HDIAP_1014 <- aggregate(true_SA1_HDIAP_1014,list(irsad_codes),sum)[,-1]
+true_IRSAD_HDIAP_1519 <- aggregate(true_SA1_HDIAP_1519,list(irsad_codes),sum)[,-1]
+
+true_RA_HDIAP_09 <- aggregate(true_SA1_HDIAP_09,list(racodes),sum)[,-1]
+true_RA_HDIAP_1014 <- aggregate(true_SA1_HDIAP_1014,list(racodes),sum)[,-1]
+true_RA_HDIAP_1519 <- aggregate(true_SA1_HDIAP_1519,list(racodes),sum)[,-1]
+
 ## Fit with spatial model
 
 compile("inla_diabetes_allages.cpp")
@@ -490,7 +538,7 @@ dyn.load(dynlib("inla_diabetes_allages"))
 ilogit <- function(x) {1/(1+exp(-x))}
 
 count <- 0
-prior_draw <- t(matrix(c(sum(STE_num_dwellings_by_DATUM_obs[,1])/sum(STE_num_dwellings_by_DATUM_obs[,2]),sum(STE_num_dwellings_by_DATUM_obsX[,1])/sum(STE_num_dwellings_by_DATUM_obsX[,2]),sum(STE_num_dwellings_by_DATUM_obsY[,1])/sum(STE_num_dwellings_by_DATUM_obsY[,2])),ncol=N_SA1,nrow=3))
+prior_draw <- t(matrix(c(sum(STE_num_dwellings_by_DATUM_obs[,1])/(sum(STE_num_dwellings_by_DATUM_obs[,2])+sum(STE_num_dwellings_by_DATUM_obs[,1])),sum(STE_num_dwellings_by_DATUM_obsX[,1])/(sum(STE_num_dwellings_by_DATUM_obsX[,2])+sum(STE_num_dwellings_by_DATUM_obsX[,1])),sum(STE_num_dwellings_by_DATUM_obsY[,1])/(sum(STE_num_dwellings_by_DATUM_obsY[,2])+sum(STE_num_dwellings_by_DATUM_obsY[,1]))),ncol=N_SA1,nrow=3))
 
 accepted_track <- array(0,dim=c(N_SA1,3,3))
 
@@ -520,9 +568,9 @@ for (z in 1:300000000) {
       'intercept_old'=-2,
       'intercept_middle'=0,
       'logit_middle_age_prop'=0,
-      'ses_effects_young'=rep(0,10),
+      'ses_effects_young'=rep(0,11),
       'ra_effects_young'=rep(0,5),
-      'ses_effects_old'=rep(0,10),
+      'ses_effects_old'=rep(0,11),
       'ra_effects_old'=rep(0,5),
       'field_young'=rep(0,aus_mesh_fine$n),
       'field_old'=rep(0,aus_mesh_fine$n)
@@ -549,14 +597,14 @@ for (z in 1:300000000) {
       'intercept_old'=0,
       'intercept_middle'=0,
       'logit_middle_age_prop'=0,
-      'ses_effects_young'=rep(0,10),
+      'ses_effects_young'=rep(0,11),
       'ra_effects_young'=rep(0,5),
-      'ses_effects_old'=rep(0,10),
+      'ses_effects_old'=rep(0,11),
       'ra_effects_old'=rep(0,5),
       'field_young'=rep(0,aus_mesh_fine$n),
       'field_old'=rep(0,aus_mesh_fine$n)
     )
-    
+
     objx <- MakeADFun(input.data,parameters,DLL = "inla_diabetes_allages")
 
     save(xsample,file=paste0("/mnt/Z/ewan/DIABETES/xsample_final",sprintf("%03i",count)))
@@ -573,7 +621,7 @@ for (z in 1:300000000) {
     xcol[xcol>q2] <- q2
     xcol <- (xcol-min(xcol))/diff(range(xcol))
     plot(sa1_2021,border=NA,col=hsv((1-xcol)*0.666))
-    
+
     xcol <- prior_draw[,3]
     q1 <- quantile(prior_draw[,3],0.1)
     q2 <- quantile(prior_draw[,3],0.9)
@@ -581,6 +629,8 @@ for (z in 1:300000000) {
     xcol[xcol>q2] <- q2
     xcol <- (xcol-min(xcol))/diff(range(xcol))
     plot(sa1_2021,border=NA,col=hsv((1-xcol)*0.666))
+    
+    cat(sum(z/10000000),"xx ",xsample[1,colnames(xsample)=="logit_middle_age_prop"],"\n")
     
     gc()
   }
@@ -677,10 +727,44 @@ for (z in 1:300000000) {
     
     current_likelihood_diff <- current_likelihood_diff+log_likelihood_diff_fn(proposed_value,current_value,observed_value)
     
+    # IRSAD likelihood
+    if (proposed_location[,3]==1) {
+      current_value <- true_IRSAD_HDIAP_09[irsad_codes[proposed_location[,1]],proposed_location[,2]]
+      observed_value <- IRSAD_by_DATUM_09[irsad_codes[proposed_location[,1]],proposed_location[,2]]
+    }
+    if (proposed_location[,3]==2) {
+      current_value <- true_IRSAD_HDIAP_1014[irsad_codes[proposed_location[,1]],proposed_location[,2]]
+      observed_value <- IRSAD_by_DATUM_1014[irsad_codes[proposed_location[,1]],proposed_location[,2]]
+    }
+    if (proposed_location[,3]==3) {
+      current_value <- true_IRSAD_HDIAP_1519[irsad_codes[proposed_location[,1]],proposed_location[,2]]
+      observed_value <- IRSAD_by_DATUM_1519[irsad_codes[proposed_location[,1]],proposed_location[,2]]
+    }
+    proposed_value <- current_value+proposed_move
+
+    current_likelihood_diff <- current_likelihood_diff+log_likelihood_diff_fn(proposed_value,current_value,observed_value)
+
+    # RA likelihood
+    if (proposed_location[,3]==1) {
+      current_value <- true_RA_HDIAP_09[racodes[proposed_location[,1]],proposed_location[,2]]
+      observed_value <- RA_by_DATUM_09[racodes[proposed_location[,1]],proposed_location[,2]]
+    }
+    if (proposed_location[,3]==2) {
+      current_value <- true_RA_HDIAP_1014[racodes[proposed_location[,1]],proposed_location[,2]]
+      observed_value <- RA_by_DATUM_1014[racodes[proposed_location[,1]],proposed_location[,2]]
+    }
+    if (proposed_location[,3]==3) {
+      current_value <- true_RA_HDIAP_1519[racodes[proposed_location[,1]],proposed_location[,2]]
+      observed_value <- RA_by_DATUM_1519[racodes[proposed_location[,1]],proposed_location[,2]]
+    }
+    proposed_value <- current_value+proposed_move
+
+    current_likelihood_diff <- current_likelihood_diff+log_likelihood_diff_fn(proposed_value,current_value,observed_value)
+    
     # Regression priors
     
-    current_pos <- true_SA1_HDIAP_AGE[proposed_location[1],1,proposed_location[2]]
-    current_neg <- true_SA1_HDIAP_AGE[proposed_location[1],2,proposed_location[2]]
+    current_pos <- true_SA1_HDIAP_AGE[proposed_location[1],1,proposed_location[3]]
+    current_neg <- true_SA1_HDIAP_AGE[proposed_location[1],2,proposed_location[3]]
 
     proposed_pos <- current_pos
     proposed_neg <- current_neg
@@ -690,8 +774,8 @@ for (z in 1:300000000) {
     proposed_priors <- current_priors <- 0
 
     if ((proposed_location[2] %in% c(1,2)) & ((current_pos+current_neg)>0 & (proposed_pos+proposed_neg)>0)) {
-      current_priors <- current_priors + dbinom(current_pos,(current_pos+current_neg),prior_draw[proposed_location[1],proposed_location[2]],log=TRUE)
-      proposed_priors <- proposed_priors + dbinom(proposed_pos,(proposed_pos+proposed_neg),prior_draw[proposed_location[1],proposed_location[2]],log=TRUE)
+      current_priors <- current_priors + dbinom(current_pos,(current_pos+current_neg),prior_draw[proposed_location[1],proposed_location[3]],log=TRUE)
+      proposed_priors <- proposed_priors + dbinom(proposed_pos,(proposed_pos+proposed_neg),prior_draw[proposed_location[1],proposed_location[3]],log=TRUE)
     }
 
     current_likelihood_diff <- current_likelihood_diff + proposed_priors - current_priors
@@ -711,6 +795,8 @@ for (z in 1:300000000) {
         true_SA3_HDIAP_09[sa1sa3codes[proposed_location[,1]],proposed_location[,2]] <- true_SA3_HDIAP_09[sa1sa3codes[proposed_location[,1]],proposed_location[,2]] + proposed_move
         true_SA4_HDIAP_09[sa1sa4codes[proposed_location[,1]],proposed_location[,2]] <- true_SA4_HDIAP_09[sa1sa4codes[proposed_location[,1]],proposed_location[,2]] + proposed_move
         true_STE_HDIAP_09[sa1stecodes[proposed_location[,1]],proposed_location[,2]] <- true_STE_HDIAP_09[sa1stecodes[proposed_location[,1]],proposed_location[,2]] + proposed_move
+        true_IRSAD_HDIAP_09[irsad_codes[proposed_location[,1]],proposed_location[,2]] <- true_IRSAD_HDIAP_09[irsad_codes[proposed_location[,1]],proposed_location[,2]] + proposed_move
+        true_RA_HDIAP_09[racodes[proposed_location[,1]],proposed_location[,2]] <- true_RA_HDIAP_09[racodes[proposed_location[,1]],proposed_location[,2]] + proposed_move
       }
       if (proposed_location[,3]==2) {
         true_SA1_HDIAP_1014[proposed_location[,1],proposed_location[,2]] <- true_SA1_HDIAP_1014[proposed_location[,1],proposed_location[,2]] + proposed_move
@@ -718,6 +804,8 @@ for (z in 1:300000000) {
         true_SA3_HDIAP_1014[sa1sa3codes[proposed_location[,1]],proposed_location[,2]] <- true_SA3_HDIAP_1014[sa1sa3codes[proposed_location[,1]],proposed_location[,2]] + proposed_move
         true_SA4_HDIAP_1014[sa1sa4codes[proposed_location[,1]],proposed_location[,2]] <- true_SA4_HDIAP_1014[sa1sa4codes[proposed_location[,1]],proposed_location[,2]] + proposed_move
         true_STE_HDIAP_1014[sa1stecodes[proposed_location[,1]],proposed_location[,2]] <- true_STE_HDIAP_1014[sa1stecodes[proposed_location[,1]],proposed_location[,2]] + proposed_move
+        true_IRSAD_HDIAP_1014[irsad_codes[proposed_location[,1]],proposed_location[,2]] <- true_IRSAD_HDIAP_1014[irsad_codes[proposed_location[,1]],proposed_location[,2]] + proposed_move
+        true_RA_HDIAP_1014[racodes[proposed_location[,1]],proposed_location[,2]] <- true_RA_HDIAP_1014[racodes[proposed_location[,1]],proposed_location[,2]] + proposed_move
       }
       if (proposed_location[,3]==3) {
         true_SA1_HDIAP_1519[proposed_location[,1],proposed_location[,2]] <- true_SA1_HDIAP_1519[proposed_location[,1],proposed_location[,2]] + proposed_move
@@ -725,12 +813,26 @@ for (z in 1:300000000) {
         true_SA3_HDIAP_1519[sa1sa3codes[proposed_location[,1]],proposed_location[,2]] <- true_SA3_HDIAP_1519[sa1sa3codes[proposed_location[,1]],proposed_location[,2]] + proposed_move
         true_SA4_HDIAP_1519[sa1sa4codes[proposed_location[,1]],proposed_location[,2]] <- true_SA4_HDIAP_1519[sa1sa4codes[proposed_location[,1]],proposed_location[,2]] + proposed_move
         true_STE_HDIAP_1519[sa1stecodes[proposed_location[,1]],proposed_location[,2]] <- true_STE_HDIAP_1519[sa1stecodes[proposed_location[,1]],proposed_location[,2]] + proposed_move
+        true_IRSAD_HDIAP_1519[irsad_codes[proposed_location[,1]],proposed_location[,2]] <- true_IRSAD_HDIAP_1519[irsad_codes[proposed_location[,1]],proposed_location[,2]] + proposed_move
+        true_RA_HDIAP_1519[racodes[proposed_location[,1]],proposed_location[,2]] <- true_RA_HDIAP_1519[racodes[proposed_location[,1]],proposed_location[,2]] + proposed_move
       }
       
     }
   }
   
   if ((z %% 10000)==1) {cat(sum(z/10000000),sum(true_SA1_HDIAP_AGE[,1,1])/sum(STE_num_dwellings_by_DATUM_obs[,1])," ",sum(true_SA1_HDIAP_AGE[,1,2])/sum(STE_num_dwellings_by_DATUM_obsX[,1])," ",sum(true_SA1_HDIAP_AGE[,1,3])/sum(STE_num_dwellings_by_DATUM_obsY[,1]),"\n")}
+  if ((z %% 10000)==1) {
+    xx <- true_IRSAD_HDIAP_09[,1]/(true_IRSAD_HDIAP_09[,1]+true_IRSAD_HDIAP_09[,2])
+    yy <- IRSAD_by_DATUM_09[,1]/(IRSAD_by_DATUM_09[,1]+IRSAD_by_DATUM_09[,2])
+    cat(sum(z/10000000),(xx-yy)/yy,"\n")}
+  if ((z %% 10000)==1) {
+    xx <- true_IRSAD_HDIAP_1014[,1]/(true_IRSAD_HDIAP_1014[,1]+true_IRSAD_HDIAP_1014[,2])
+    yy <- IRSAD_by_DATUM_1014[,1]/(IRSAD_by_DATUM_1014[,1]+IRSAD_by_DATUM_1014[,2])
+    cat(sum(z/10000000),(xx-yy)/yy,"\n")}
+  if ((z %% 10000)==1) {
+    xx <- true_IRSAD_HDIAP_1519[,1]/(true_IRSAD_HDIAP_1519[,1]+true_IRSAD_HDIAP_1519[,2])
+    yy <- IRSAD_by_DATUM_1519[,1]/(IRSAD_by_DATUM_1519[,1]+IRSAD_by_DATUM_1519[,2])
+    cat(sum(z/10000000),(xx-yy)/yy,"\n")}
   if ((z%%1000000)==0) {save(true_SA1_HDIAP_AGE,file=paste0("/mnt/Z/ewan/DIABETES/true_SA1_HDIAP_AGE_saved",sprintf("%03i",count)))}
 } # Z
 
@@ -876,11 +978,10 @@ posterior_risk_high_NDSS_LGA_oldw <- apply((posterior_draws_NDSS_LGA_oldw),2,qua
 posterior_risk_sd_young <- apply((posterior_draws),2,sd)
 posterior_risk_sd_old <- apply((posterior_draws_old),2,sd)
 
-
 sa1_2021_outputs$RMEAY <- posterior_risk_median_young
 sa1_2021_outputs$RMEAO <- posterior_risk_median_old
-sa1_2021_outputs$SSMEY <- posterior_risk_sd_young/median(posterior_risk_median_young)
-sa1_2021_outputs$SSMEO <- posterior_risk_sd_old/median(posterior_risk_median_old)
+sa1_2021_outputs$SSMEY <- posterior_risk_sd_young
+sa1_2021_outputs$SSMEO <- posterior_risk_sd_old
 
 exceedence_draws <- posterior_draws>median(sa1_2021_outputs$RMEAY)
 exceedence <- apply(exceedence_draws,2,mean)
