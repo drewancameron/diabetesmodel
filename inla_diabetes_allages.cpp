@@ -37,9 +37,9 @@ Type objective_function<Type>::operator() ()
   
   PARAMETER(logit_middle_age_prop);
   
-  PARAMETER_VECTOR(ses_effects_young); // [dim: 10]
+  PARAMETER_VECTOR(ses_effects_young); // [dim: 11]
   PARAMETER_VECTOR(ra_effects_young); // [dim: 5]
-  PARAMETER_VECTOR(ses_effects_old); // [dim: 10]
+  PARAMETER_VECTOR(ses_effects_old); // [dim: 11]
   PARAMETER_VECTOR(ra_effects_old); // [dim: 5]
   
   PARAMETER_VECTOR(field_young); // [dim: nMesh]
